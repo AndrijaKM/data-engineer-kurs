@@ -1,0 +1,72 @@
+--1
+SELECT
+    match_id,
+    season,
+    home_team,
+    away_team,
+    stadium_name,
+    stadium_capacity,
+    attendance,
+    (stadium_capacity - attendance) AS empty_seats
+FROM bootcamp.northern_star.matches_flat
+WHERE attendance IS NOT NULL
+ORDER BY empty_seats DESC
+LIMIT 5;
+--zajednicko je to sto na stadionu National Stadium je veoma slaba posecenost
+
+--2
+SELECT COUNT(DISTINCT referee_id) AS broj_sudija
+FROM bootcamp.northern_star.matches_flat
+WHERE home_team = 'Riverton Athletic';
+
+--3
+SELECT COUNT(*) AS broj_utakmica
+FROM bootcamp.northern_star.matches_flat
+WHERE home_goals_ht < away_goals_ht AND home_goals > away_goals;
+
+--4
+SELECT
+    match_id,
+    home_team,
+    away_team,
+    home_goals_ht,
+    away_goals_ht,
+    home_goals,
+    away_goals,
+    (
+        (home_goals + away_goals)
+        - (home_goals_ht + away_goals_ht)
+    ) AS second_half_goals
+FROM bootcamp.northern_star.matches_flat
+WHERE status = 'played'
+ORDER BY second_half_goals DESC
+LIMIT 1;
+
+--5
+SELECT COUNT(*) AS broj_utakmica
+FROM bootcamp.northern_star.matches_flat
+WHERE season = '2023/24' AND weather IN ('snow', 'fog');
+
+--6
+SELECT
+    kickoff_ts,
+    home_team,
+    away_team,
+    home_goals,
+    away_goals
+FROM bootcamp.northern_star.matches_flat
+WHERE 'Northport United' IN (home_team, away_team) AND 'Northport City' IN (home_team, away_team)
+ORDER BY kickoff_ts;
+
+--7
+SELECT *
+FROM bootcamp.northern_star.matches_flat
+WHERE season = '2024/25'
+ORDER BY kickoff_ts
+LIMIT 3;
+--da bismo bili sigurni koja je druga, koja treca, u tom slucaju dodajemo sledece: ORDER BY kickoff_ts, match_id;
+
+--8
+SELECT *
+FROM bootcamp.northern_star.matches_flat
+WHERE first_goal_scorer LIKE 'Sean%Neill';
