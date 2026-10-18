@@ -1,0 +1,51 @@
+--1
+SELECT *
+FROM bootcamp.northern_star.matches_flat
+WHERE LOWER(match_report) LIKE '%goal%';
+
+--2
+SELECT
+    match_id,
+    COALESCE(referee_name, 'Unknown') AS referee_name
+FROM bootcamp.northern_star.matches_flat
+LIMIT 20;
+
+--3
+SELECT
+    match_report,
+    LENGTH(match_report) AS broj_karaktera
+FROM bootcamp.northern_star.matches_flat
+WHERE LENGTH(match_report) > 40;
+
+--4
+SELECT *
+FROM bootcamp.northern_star.matches_flat
+WHERE DATE(kickoff_ts) BETWEEN '2025-01-01' AND '2025-01-15';
+
+--5
+SELECT COUNT(*)
+FROM bootcamp.northern_star.matches_flat
+WHERE DAYNAME(kickoff_ts) = 'Friday';
+
+--6
+SELECT COUNT(*)
+FROM bootcamp.northern_star.matches_flat
+WHERE season = '2024/25'AND attendance BETWEEN 20000 AND 35000;
+
+--7
+SELECT DISTINCT first_goal_scorer
+FROM bootcamp.northern_star.matches_flat
+WHERE first_goal_scorer LIKE 'A%' OR first_goal_scorer LIKE '%-%';
+
+--8
+SELECT
+    TIME(kickoff_ts) AS vreme_pocetka,
+    home_team,
+    away_team
+FROM bootcamp.northern_star.matches_flat
+WHERE season = '2024/25' AND TIME(kickoff_ts) BETWEEN '18:00:00' AND '21:00:00';
+
+--9
+SELECT COUNT(*)
+FROM bootcamp.northern_star.matches_flat
+WHERE DATE(kickoff_ts) BETWEEN '2025-03-01' AND '2025-05-31' AND LOWER(match_report) LIKE '%win%';
