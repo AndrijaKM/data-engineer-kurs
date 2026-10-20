@@ -1,0 +1,86 @@
+--1
+SELECT
+    season,
+    COUNT(*) AS broj_utakmica,
+    SUM(home_goals + away_goals) AS ukupan_broj_golova,
+    ROUND(AVG(home_goals + away_goals), 2) AS prosecno_golova
+FROM matches_flat
+GROUP BY season;
+
+--2
+SELECT
+    stadium_name,
+    MIN(attendance) AS najmanja_poseta,
+    MAX(attendance) AS najveca_poseta,
+    ROUND(AVG(attendance), 2) AS prosecna_poseta,
+    COUNT(attendance) AS broj_utakmica
+FROM matches_flat
+GROUP BY stadium_name;
+
+--3
+SELECT
+    referee_name,
+    COUNT(*) AS broj_utakmica,
+    SUM(yellow_cards_home + yellow_cards_away) AS ukupno_zutih
+FROM matches_flat
+GROUP BY referee_name
+HAVING COUNT(*) >= 10
+AND SUM(yellow_cards_home + yellow_cards_away) >= 20;
+
+--4
+SELECT
+    CASE
+        WHEN home_goals + away_goals = 0 THEN 'Bez golova'
+        WHEN home_goals + away_goals <= 2 THEN 'Malo golova'
+        ELSE 'Mnogo golova'
+    END AS kategorija,
+    COUNT(*) AS broj_utakmica,
+    MAX(home_goals + away_goals) AS max_golova
+FROM matches_flat
+GROUP BY kategorija;
+
+--5
+SELECT
+    home_team,
+    COUNT(*) AS utakmice,
+    SUM(CASE WHEN home_goals > away_goals THEN 1 ELSE 0 END) AS pobede,
+    SUM(CASE WHEN home_goals < away_goals THEN 1 ELSE 0 END) AS porazi
+FROM matches_flat
+GROUP BY home_team
+HAVING COUNT(*) >= 10;
+
+--6
+SELECT
+    referee_name,
+    COUNT(*) AS ukupno_utakmica,
+    SUM(
+        CASE
+            WHEN red_cards_home + red_cards_away > 0 THEN 1
+            ELSE 0
+        END
+    ) AS utakmice_sa_crvenim,
+    ROUND(
+        SUM(
+            CASE
+                WHEN red_cards_home + red_cards_away > 0 THEN 1
+                ELSE 0
+            END
+        ) * 100.0 / COUNT(*),
+        2
+    ) AS procenat
+FROM matches_flat
+GROUP BY referee_name;
+
+--7
+SELECT
+    season,
+    SUM(CASE WHEN home_goals > away_goals THEN 1 ELSE 0 END) AS pobede_domacina,
+    SUM(CASE WHEN home_goals = away_goals THEN 1 ELSE 0 END) AS neresene,
+    SUM(CASE WHEN home_goals < away_goals THEN 1 ELSE 0 END) AS pobede_gostiju,
+    ROUND(
+        SUM(CASE WHEN home_goals = away_goals THEN 1 ELSE 0 END) * 100.0
+        / COUNT(*),
+        2
+    ) AS procenat_neresenih
+FROM matches_flat
+GROUP BY season;
