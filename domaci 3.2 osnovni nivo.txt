@@ -1,0 +1,26 @@
+--1. Prikažite naziv svakog kluba i naziv stadiona na kojem igra domaće utakmice.
+SELECT t.team_name,
+       s.stadium_name
+FROM teams t
+JOIN stadiums s
+    ON t.stadium_id = s.stadium_id;
+
+--2.Prikažite ime i prezime igrača i naziv kluba za koji je igrao u sezoni 2024/25. Uklonite duplikate iz rezultata.
+SELECT DISTINCT
+       p.first_name,
+       p.last_name,
+       t.team_name
+FROM players p
+JOIN player_contracts pc
+    ON p.player_id = pc.player_id
+JOIN teams t
+    ON pc.team_id = t.team_id;
+
+--3.Prikažite datum odigravanja utakmice, naziv stadiona i broj gledalaca za sve utakmice u sezoni 2024/25.
+SELECT m.kickoff_ts,
+       s.stadium_name,
+       m.attendance
+FROM matches m
+JOIN stadiums s
+    ON m.stadium_id = s.stadium_id
+WHERE m.season = '2024/25';
