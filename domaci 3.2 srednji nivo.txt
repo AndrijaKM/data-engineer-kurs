@@ -1,0 +1,31 @@
+--Srednji nivo
+
+-- 1. Prikažite sve utakmice za koje nije evidentiran broj gledalaca.
+-- Prikažite datum, domaći klub i gostujući klub.
+SELECT
+    m.kickoff_ts,
+    ht.team_name AS home_team,
+    at.team_name AS away_team
+FROM matches m
+JOIN teams ht ON m.home_team_id = ht.team_id
+JOIN teams at ON m.away_team_id = at.team_id
+WHERE m.attendance IS NULL;
+
+--2.Pronađite stadione na kojima nije odigrana ni jedna utakmica u sezoni 2024/25.
+SELECT s.stadium_name
+FROM stadiums s
+WHERE s.stadium_id NOT IN (
+    SELECT DISTINCT m.stadium_id
+    FROM matches m
+    WHERE m.season = '2024/25');
+
+--3.Za svaki klub izračunajte ukupan broj žutih kartona koje su dobili njegovi igrači u sezoni 2024/25. Rezultat sortirajte opadajuće prema broju kartona.
+SELECT
+    t.team_name,
+    SUM(mf.home_yellow_cards + mf.away_yellow_cards) AS total_yellow_cards
+FROM matches_flat mf
+JOIN player_match_stats ps ON mf.match_id = ps.match_id
+JOIN players p ON ps.player_id = p.player_id
+JOIN teams t ON ps.team_id = t.team_id
+GROUP BY t.team_name
+ORDER BY total_yellow_cards DESC;
