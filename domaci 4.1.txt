@@ -1,0 +1,73 @@
+--1
+SELECT COUNT(*)
+FROM matches m
+JOIN player_match_stats pms
+    ON m.match_id = pms.match_id
+WHERE m.season = '2024/25';
+--kada spojimo tabele, jedna utakmica iz matches se pojavljuje više puta, po jednom za svakog igrača koji je nastupio na toj utakmici
+
+--2
+SELECT COUNT(*)
+FROM (
+    SELECT
+        pms.player_id,
+        m.season
+    FROM player_match_stats pms
+    JOIN matches m
+        ON pms.match_id = m.match_id
+    GROUP BY pms.player_id, m.season
+    HAVING COUNT(DISTINCT pms.team_id) > 1
+) t;
+
+--3
+SELECT AVG(cards)
+FROM (
+    SELECT COUNT(event_id) AS cards
+    FROM match_events
+    WHERE event_type IN ('yellow_card', 'red_card', 'second_yellow')
+    GROUP BY match_id
+) t;
+SELECT COUNT(match_id)
+FROM (
+    SELECT match_id,
+           COUNT(event_id) AS cards
+    FROM match_events
+    WHERE event_type IN ('yellow_card', 'red_card', 'second_yellow')
+    GROUP BY match_id
+) t
+WHERE cards >
+(
+    SELECT AVG(cards)
+    FROM (
+        SELECT COUNT(event_id) AS cards
+        FROM match_events
+        WHERE event_type IN ('yellow_card', 'red_card', 'second_yellow')
+        GROUP BY match_id
+    ) x
+);
+--4
+SELECT COUNT(*)
+FROM (
+    SELECT
+        pms.player_id
+    FROM player_match_stats pms
+    JOIN matches m
+        ON pms.match_id = m.match_id
+    WHERE m.season = '2024/25'
+    GROUP BY pms.player_id
+    HAVING COUNT(DISTINCT pms.match_id) > 10
+) t;
+
+--5
+SELECT COUNT(team_name)
+FROM (
+    SELECT home_team AS team_name
+    FROM matches_flat
+    WHERE season = '2024/25'
+
+    UNION
+
+    SELECT away_team
+    FROM matches_flat
+    WHERE season = '2024/25'
+) t;
