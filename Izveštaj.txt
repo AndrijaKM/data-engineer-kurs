@@ -1,0 +1,194 @@
+--Izvestaj:
+--1. Sezona u brojevima: utakmice, pobede, nerešene, porazi, dati i primljeni golovi, bodovi
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Arsenal'
+)
+SELECT
+    COUNT(*) AS matches,
+    SUM(
+        CASE
+            WHEN (m.home_team_id = c.team_id AND home_goals > away_goals)
+              OR (m.away_team_id = c.team_id AND away_goals > home_goals)
+            THEN 1 ELSE 0
+        END
+    ) AS wins,
+    SUM(
+        CASE
+            WHEN home_goals = away_goals
+            THEN 1 ELSE 0
+        END
+    ) AS draws,
+    SUM(
+        CASE
+            WHEN (m.home_team_id = c.team_id AND home_goals < away_goals)
+              OR (m.away_team_id = c.team_id AND away_goals < home_goals)
+            THEN 1 ELSE 0
+        END
+    ) AS losses,
+    SUM(
+        CASE
+            WHEN m.home_team_id = c.team_id THEN home_goals
+            ELSE away_goals
+        END
+    ) AS goals_for,
+    SUM(
+        CASE
+            WHEN m.home_team_id = c.team_id THEN away_goals
+            ELSE home_goals
+        END
+    ) AS goals_against,
+    SUM(
+        CASE
+            WHEN (m.home_team_id = c.team_id AND home_goals > away_goals)
+              OR (m.away_team_id = c.team_id AND away_goals > home_goals)
+            THEN 3
+            WHEN home_goals = away_goals
+            THEN 1
+            ELSE 0
+        END
+    ) AS points
+FROM matches m
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND (m.home_team_id = c.team_id OR m.away_team_id = c.team_id);
+--2. Kod kuće i u gostima
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Arsenal'
+)
+SELECT
+    CASE
+        WHEN m.home_team_id = c.team_id THEN 'Home'
+        ELSE 'Away'
+    END AS venue,
+    COUNT(*) AS matches,
+    SUM(
+        CASE
+            WHEN (m.home_team_id = c.team_id AND home_goals > away_goals)
+              OR (m.away_team_id = c.team_id AND away_goals > home_goals)
+            THEN 1 ELSE 0
+        END
+    ) AS wins,
+    SUM(
+        CASE
+            WHEN home_goals = away_goals
+            THEN 1 ELSE 0
+        END
+    ) AS draws,
+    SUM(
+        CASE
+            WHEN (m.home_team_id = c.team_id AND home_goals < away_goals)
+              OR (m.away_team_id = c.team_id AND away_goals < home_goals)
+            THEN 1 ELSE 0
+        END
+    ) AS losses
+FROM matches m
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND (m.home_team_id = c.team_id OR m.away_team_id = c.team_id)
+GROUP BY venue;
+--3. Tri najbolja strelca i najbolji asistent
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Arsenal'
+)
+SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(*) AS goals
+FROM match_events me
+JOIN players p
+    ON me.player_id = p.player_id
+JOIN matches m
+    ON me.match_id = m.match_id
+CROSS JOIN club c
+WHERE m.season = '2024/25'
+  AND me.team_id = c.team_id
+  AND me.event_type IN ('goal', 'penalty_goal')
+GROUP BY p.player_id, p.first_name, p.last_name
+ORDER BY goals DESC
+LIMIT 3;
+--4. Kartoni po utakmici u poređenju sa prosekom lige
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Arsenal'
+)
+SELECT
+    ROUND(COUNT(*) * 1.0 /
+          COUNT(DISTINCT me.match_id),2) AS club_cards_per_match
+FROM match_events me
+JOIN matches m
+    ON me.match_id = m.match_id
+CROSS JOIN club c
+WHERE m.season = '2024/25'
+  AND me.team_id = c.team_id
+  AND me.event_type IN ('yellow_card','red_card','second_yellow');
+--6. Najveća pobeda i najteži poraz
+WITH club AS (
+    SELECT team_id
+    FROM teams
+    WHERE team_name = 'Arsenal'
+)
+SELECT *
+FROM matches m
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND (
+    (m.home_team_id = c.team_id)
+    OR
+    (m.away_team_id = c.team_id)
+)
+ORDER BY
+(
+    CASE
+        WHEN m.home_team_id = c.team_id
+        THEN home_goals - away_goals
+        ELSE away_goals - home_goals
+    END
+) DESC
+LIMIT 1;
+
+--7.Publika: prosečna poseta, popunjenost i utakmice bez posete
+
+--Prosečna poseta
+WITH club AS (
+SELECT team_id
+FROM teams
+WHERE team_name = 'Arsenal'
+)
+SELECT AVG(attendance)
+FROM matches m
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND m.home_team_id = c.team_id;
+
+--Popunjenost stadiona:
+WITH club AS (
+SELECT team_id
+FROM teams
+WHERE team_name = 'Arsenal'
+)
+SELECT
+ROUND(AVG(attendance * 100.0 / capacity),2) AS occupancy_pct
+FROM matches_flat
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND home_team_id = c.team_id;
+
+--Broj utakmica bez podatka o poseti:
+WITH club AS (
+SELECT team_id
+FROM teams
+WHERE team_name = 'Arsenal'
+)
+SELECT COUNT(*)
+FROM matches m
+CROSS JOIN club c
+WHERE season = '2024/25'
+AND home_team_id = c.team_id
+AND attendance IS NULL;
