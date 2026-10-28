@@ -1,0 +1,85 @@
+--domaci 5.1
+--1
+SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(*) AS goals,
+    DENSE_RANK() OVER (
+        ORDER BY COUNT(*) DESC
+    ) AS goal_rank
+FROM match_events me
+JOIN players p
+    ON me.player_id = p.player_id
+JOIN matches m
+    ON me.match_id = m.match_id
+WHERE m.season = '2024/25'
+  AND me.event_type IN ('goal', 'penalty_goal')
+GROUP BY
+    p.player_id,
+    p.first_name,
+    p.last_name
+HAVING COUNT(*) > 0
+ORDER BY goals DESC, p.last_name;
+--2
+SELECT *
+FROM (
+    SELECT
+        t.team_name,
+        p.first_name,
+        p.last_name,
+        COUNT(*) AS goals,
+        ROW_NUMBER() OVER (
+            PARTITION BY t.team_name
+            ORDER BY COUNT(*) DESC
+        ) AS rn
+    FROM match_events me
+    JOIN players p
+        ON p.player_id = me.player_id
+    JOIN player_match_stats ps
+        ON ps.player_id = me.player_id
+       AND ps.match_id = me.match_id
+    JOIN teams t
+        ON t.team_id = ps.team_id
+    JOIN matches m
+        ON m.match_id = me.match_id
+    WHERE m.season = '2024/25'
+      AND me.event_type IN ('goal', 'penalty_goal')
+    GROUP BY
+        t.team_name,
+        p.first_name,
+        p.last_name
+) x
+WHERE rn <= 3
+ORDER BY team_name, rn;
+--3
+SELECT
+    p.first_name,
+    p.last_name,
+    COUNT(*) AS goals,
+    DENSE_RANK() OVER (ORDER BY COUNT(*) DESC) AS rank_num
+FROM match_events me
+JOIN players p ON p.player_id = me.player_id
+JOIN matches m ON m.match_id = me.match_id
+WHERE m.season = '2024/25'
+  AND me.event_type IN ('goal', 'penalty_goal')
+GROUP BY p.player_id, p.first_name, p.last_name
+ORDER BY goals DESC;
+
+--5.2 prvi zadatak
+SELECT
+    t.team_name,
+    m.kickoff_ts,
+    AVG(
+        CASE
+            WHEN t.team_id = m.home_team_id THEN m.home_goals
+            ELSE m.away_goals
+        END
+    ) OVER (
+        PARTITION BY t.team_id
+        ORDER BY m.kickoff_ts
+        ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+    ) AS avg_last_5
+FROM teams t
+JOIN matches m
+    ON t.team_id IN (m.home_team_id, m.away_team_id)
+WHERE m.season = '2024/25';
