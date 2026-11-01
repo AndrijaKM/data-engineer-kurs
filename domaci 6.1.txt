@@ -1,0 +1,56 @@
+--1
+CREATE TABLE dim_player AS
+SELECT
+    player_id,
+    first_name,
+    last_name,
+    position,
+    nationality
+FROM players;
+
+SELECT COUNT(*)
+FROM dim_player; --681 redova
+
+--2
+
+CREATE TABLE dim_date AS
+SELECT DISTINCT
+    CAST(date_format(kickoff_ts, 'yyyyMMdd') AS INT) AS date_key,
+    DATE(kickoff_ts) AS full_date,
+    YEAR(kickoff_ts) AS year,
+    MONTH(kickoff_ts) AS month,
+    DAY(kickoff_ts) AS day
+FROM matches;
+
+CREATE TABLE fact_player_match AS
+SELECT
+    pms.match_id,
+    dd.date_key,
+    pms.player_id,
+    pms.team_id,
+    pms.minutes_played,
+    pms.shots,
+    pms.passes,
+    pms.rating
+FROM player_match_stats pms
+JOIN matches m
+    ON pms.match_id = m.match_id
+JOIN dim_date dd
+    ON DATE(m.kickoff_ts) = dd.full_date;
+
+--3
+SELECT
+    dp.position,
+    ROUND(AVG(fpm.rating), 2) AS avg_rating
+FROM fact_player_match fpm
+JOIN dim_player dp
+    ON fpm.player_id = dp.player_id
+GROUP BY dp.position
+ORDER BY avg_rating DESC;
+
+--4
+ALTER TABLE fact_player_match
+ADD COLUMN goals INT;
+
+SELECT SUM(goals) AS total_goals
+FROM fact_player_match;
