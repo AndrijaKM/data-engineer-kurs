@@ -1,0 +1,66 @@
+8.1
+
+1.
+
+def get_even_positions(data: tuple) -> tuple:
+    result = []
+    for i in range(len(data)):
+        if i % 2 == 0:
+            result.append(data[i])
+    return tuple(result)
+
+print(get_even_positions((10, 20, 30, 40, 50, 60)))
+
+2.
+
+def find_exclusive_students(group1: set, group2: set) -> set:
+    result = set()
+    for student in group1:
+        if student not in group2:
+            result.add(student)
+    return result
+
+print(find_exclusive_students(
+    {'Ana', 'Marko', 'Jovan', 'Milica'},
+    {'Marko', 'Milica', 'Petar'}
+))
+
+3.
+
+def clean_tags(text: str) -> str:
+    result = []
+    tags = text.split('|')
+
+    for tag in tags:
+        result.append(tag.strip().lower())
+
+    return '-'.join(result)
+
+print(clean_tags(' Python | DATA | SQL '))
+
+4.
+
+def count_products(csv_lines: list) -> dict:
+    result = {}
+
+    for line in csv_lines[1:]:
+        parts = line.split(',')
+        product = parts[1]
+        quantity = int(parts[2])
+
+        if product in result:
+            result[product] += quantity
+        else:
+            result[product] = quantity
+
+    return result
+
+
+print(count_products([
+    'customer,product,,quantity',
+    'Alice,laptop,2',
+    'Bob,mouse,3',
+    'Alice,laptop,1',
+    'Charlie,keyboard,2',
+    'Bob,mouse,1'
+]))
