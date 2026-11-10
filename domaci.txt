@@ -1,0 +1,63 @@
+# 19
+
+import csv
+
+def get_header(path: str) -> list:
+    with open(path, "r") as file:
+        reader = csv.reader(file)
+        return next(reader)
+
+#20
+
+import csv
+
+def read_rows(path: str) -> list:
+    with open(path, "r") as file:
+        reader = csv.reader(file)
+
+        next(reader)  # preskoci zaglavlje
+
+        rows = []
+        for row in reader:
+            rows.append(row)
+
+    return rows
+
+#21
+
+import csv
+
+def total_points(path: str) -> int:
+    with open(path, "r") as file:
+        reader = csv.DictReader(file)
+
+        ukupno = 0
+
+        for row in reader:
+            ukupno += int(row["points"])
+
+    return ukupno
+
+#22
+
+import csv
+
+def write_rows(path: str, rows: list) -> None:
+    with open(path, "w", newline="") as file:
+        writer = csv.writer(file)
+
+        for row in rows:
+            writer.writerow(row)
+
+#23
+
+import csv
+
+def write_dicts(path: str, rows: list) -> None:
+    with open(path, "w", newline="") as file:
+        writer = csv.DictWriter(file, fieldnames=rows[0].keys())
+
+        writer.writeheader()
+
+        for row in rows:
+            writer.writerow(row)
