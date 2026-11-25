@@ -1,0 +1,48 @@
+import requests
+
+# 1. Informacije o ISS stanici
+
+def get_space_station() -> dict:
+    odgovor = requests.get("http://api.open-notify.org/iss-now.json")
+    podaci = odgovor.json()
+
+    return {
+        "latitude": podaci["iss_position"]["latitude"],
+        "longitude": podaci["iss_position"]["longitude"]
+    }
+
+print("--- ZADATAK 1 ---")
+print(get_space_station())
+
+
+# 2. Univerziteti po državi
+
+def get_universities(country: str) -> list:
+    odgovor = requests.get(
+        "http://universities.hipolabs.com/search",
+        params={"country": country}
+    )
+
+    univerziteti = odgovor.json()
+
+    nazivi = [u["name"] for u in univerziteti]
+
+    return nazivi
+
+print("\n--- ZADATAK 2 ---")
+print(get_universities("Serbia"))
+
+
+# 3. Kurs valuta
+
+def get_exchange_rate(base: str, target: str) -> float:
+
+    url = f"https://api.frankfurter.app/latest?from={base}&to={target}"
+
+    odgovor = requests.get(url)
+    podaci = odgovor.json()
+
+    return podaci["rates"][target]
+
+print("\n--- ZADATAK 3 ---")
+print(get_exchange_rate("EUR", "RSD"))

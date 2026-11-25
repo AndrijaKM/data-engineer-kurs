@@ -1,0 +1,157 @@
+import numpy as np
+
+# 1. Aktivni korisnici
+
+aktivni = np.array([
+    120, 150, 180, 200, 170, 190,
+    220, 210, 160, 140, 130, 110
+])
+
+peti = aktivni[4]
+poslednji = aktivni[-4:]
+ukupno = np.sum(aktivni)
+prosek = np.average(aktivni)
+najveci_sat = np.argmax(aktivni) + 1
+
+print('--- ZADATAK 1 ---')
+print(f'Peti sat -> {peti}')
+print(f'Poslednja 4 sata -> {poslednji}')
+print(f'Ukupno korisnika -> {ukupno}')
+print(f'Prosek -> {prosek}')
+print(f'Najopterećeniji sat -> {najveci_sat}')
+
+
+# 2. Serveri
+
+resursi = np.array([
+    [40, 60, 50],
+    [70, 80, 60],
+    [30, 40, 50],
+    [90, 85, 80],
+    [50, 55, 60]
+])
+
+redovi, kolone = resursi.shape
+
+prosek_po_kolonama = np.mean(resursi, axis=0)
+prosek_po_redovima = np.mean(resursi, axis=1)
+
+print('\n--- ZADATAK 2 ---')
+print('Shape:', resursi.shape)
+print('Dimenzije:', resursi.ndim)
+print('Servera:', redovi)
+print('Metrika:', kolone)
+print('Prosek metrika:', prosek_po_kolonama)
+print('Prosek servera:', prosek_po_redovima)
+print('Najveći prosek ima server:', np.argmax(prosek_po_redovima) + 1)
+
+
+# 3. Vreme izvršavanja procesa
+
+trajanja = np.array([
+    15, 20, 105, 135, 22,
+    56, 120, 150, 66, 70,
+    45, 55, 455, 72, 17,
+    18, 11, 24, 26, 28
+])
+
+preko_100 = trajanja[trajanja > 100]
+od_40_do_100 = trajanja[(trajanja >= 40) & (trajanja <= 100)]
+
+broj_kratkih = np.count_nonzero(trajanja < 50)
+pozicije = np.where(trajanja > 100)[0]
+
+print('\n--- ZADATAK 3 ---')
+print('Procesi >100:', preko_100)
+print('Procesi 40-100:', od_40_do_100)
+print('Kraći od 50:', broj_kratkih)
+print('Indeksi >100:', pozicije)
+print('Srednja vrednost:', round(np.mean(trajanja), 2))
+
+
+# 4. Prihodi prodavnice
+
+kategorije = np.array([
+    'Odeća',
+    'Obuća',
+    'Pelene',
+    'Igracke'
+])
+
+meseci = np.array([
+    'Januar',
+    'Februar',
+    'Mart',
+    'April',
+    'Maj',
+    'Jun'
+])
+
+promet = np.array([
+    [10000, 12000, 14000, 16000, 18000, 20000],
+    [20000, 22000, 24000, 26000, 28000, 30000],
+    [5000, 6000, 7000, 8000, 15000, 10000],
+    [30000, 28000, 32000, 34000, 36000, 38000]
+])
+
+po_kategoriji = np.sum(promet, axis=1)
+po_mesecu = np.sum(promet, axis=0)
+
+print('\n--- ZADATAK 4 ---')
+print('Ukupno po kategoriji:', po_kategoriji)
+print('Ukupno po mesecu:', po_mesecu)
+
+print(
+    'Najprofitabilnija kategorija:',
+    kategorije[np.argmax(po_kategoriji)]
+)
+
+print(
+    'Najprofitabilniji mesec:',
+    meseci[np.argmax(po_mesecu)]
+)
+
+print('Prosek kategorija:', np.mean(promet, axis=1))
+print('Prosek meseca:', np.mean(po_mesecu))
+
+
+# 5. Temperature
+
+temperature = np.array([
+    10, 12, np.nan, 15, -27,
+    20, 55, 18, np.nan, -20,
+    51, 14, 17, 24, 8
+])
+
+nan_vrednosti = np.isnan(temperature)
+
+pogresne = np.logical_or(
+    temperature < -20,
+    temperature > 50
+)
+
+losi_redovi = np.logical_or(
+    nan_vrednosti,
+    pogresne
+)
+
+print('\n--- ZADATAK 5 ---')
+print('Nedostaju podaci:', nan_vrednosti)
+print('Indeksi NaN:', np.where(nan_vrednosti)[0])
+
+print('Nevalidne temperature:', temperature[pogresne])
+print('Indeksi nevalidnih:', np.where(pogresne)[0])
+
+print('Broj NaN:', np.sum(nan_vrednosti))
+print('Broj nevalidnih:', np.sum(pogresne))
+
+procenat = (np.sum(losi_redovi) / len(temperature)) * 100
+print('Procenat loših zapisa:', round(procenat, 2), '%')
+
+ispravne = temperature[~losi_redovi]
+print('Validne temperature:', ispravne)
+
+print(
+    'Prosek validnih temperatura:',
+    round(np.mean(ispravne), 2)
+)
